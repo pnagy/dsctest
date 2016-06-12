@@ -7,8 +7,13 @@ var ROMAN_DIGITS = ["I", "V", "X", "L", "C", "D", "M"]
 var ARABIC_DIGITS = [1, 5, 10, 50, 100, 500, 1000]
 
 
-var getValue = function (number) {
+var getArabicValue = function (number) {
   if (typeof number === "string") return ARABIC_DIGITS[ROMAN_DIGITS.indexOf(number)]
+  return null
+}
+
+var getRomanValue = function (number) {
+  if (typeof number === "number") return ROMAN_DIGITS[ARABIC_DIGITS.indexOf(number)]
   return null
 }
 
@@ -18,7 +23,7 @@ var checkArabicInput = function(number) {
     if (number < 1 || number > 3999) throw new Error(ERRORS.INVALID_RANGE)
     return number
   }
-  return null
+  return 0
 }
 
 var checkRomanInput = function(number) {
@@ -33,7 +38,7 @@ var checkRomanInput = function(number) {
     }
     return number
   }
-  return null
+  return ""
 }
 
 
@@ -46,8 +51,8 @@ function RomanNumber (number) {
 }
 
 RomanNumber.prototype.toInt = function() {
-  if (this.arabic !== null) return this.arabic
-  var sum = 0
+  if (this.arabic) return this.arabic
+
   var subsum = 0
   var skipDigit = false
   for (var j = 0; j < this.roman.length; ++j) {
@@ -59,7 +64,7 @@ RomanNumber.prototype.toInt = function() {
     var prevIndex = ROMAN_DIGITS.indexOf(this.roman[j - 1])
     var nextIndex = ROMAN_DIGITS.indexOf(this.roman[j + 1])
 
-    var arabValue = getValue(this.roman[j])
+    var arabValue = getArabicValue(this.roman[j])
     //if we start a new calculation
     if (subsum === 0) {
       subsum = arabValue
@@ -72,96 +77,58 @@ RomanNumber.prototype.toInt = function() {
     }
     //if we find a greater digit eg. IX, XL, CD
     if (currIndex > prevIndex) {
-      sum += arabValue - subsum
+      this.arabic += arabValue - subsum
       subsum = 0
     }
     //if we find a less digit eg. XI, LX
     if (currIndex < prevIndex) {
       //if we find a less digit but the next digit is greater again XIX, MCM
       if (currIndex < nextIndex) {
-        sum += subsum + getValue(this.roman[j+1]) - arabValue
+        this.arabic += subsum + getArabicValue(this.roman[j+1]) - arabValue
         subsum = 0
         //we used the next digit, so we need to skip the next iteration
         skipDigit = true
       } else {
-        sum += arabValue + subsum
+        this.arabic += arabValue + subsum
         subsum = 0
       }
     }
   }
-  return sum + subsum
+  this.arabic += subsum
+  return this.arabic
+}
+
+function getDigitValues(number, base) {
+  var romanDigits = [9, 5, 4]
+  var roman = ""
+  for (var i = 0; i < romanDigits.length; ++i) {
+    if (number >= (romanDigits[i] * base)) {
+      var value = getRomanValue(romanDigits[i] * base)
+      if (value) {
+        roman += value
+      } else {
+        roman += getRomanValue(base) + getRomanValue((romanDigits[i] + 1) * base)
+      }
+      number -= (romanDigits[i] * base)
+    }
+  }
+  for (var i = 0; i < Math.floor(number / base); ++i) {
+    roman += getRomanValue(base)
+  }
+  return roman
 }
 
 RomanNumber.prototype.toString = function() {
-  if (this.roman !== null) return this.roman
-  var num = ""
-  var rem = this.arabic
-  var curr
+  if (this.roman) return this.roman
 
-  if (rem > 999) {
-    curr = Math.floor(rem / 1000)
-    rem = rem % 1000
-    for (var i = 0; i < curr; ++i) {
-      num += "M"
-    }
+  var remaining = this.arabic
+  while (remaining > 0) {
+    var base = Math.pow(10, Math.floor(Math.log10(remaining)))
+    var part = Math.trunc(remaining / base) * base
+    this.roman += getDigitValues(part, base)
+    remaining -= part
   }
-  if (rem >= 900) {
-    num += "CM"
-    rem -= 900
-  }
-  if (rem >= 500) {
-    num += "D"
-    rem -= 500
-  }
-  if (rem >= 400) {
-    num += "CD"
-    rem -= 400
-  }
-
-  if (rem > 99) {
-    curr = Math.floor(rem / 100)
-    rem = rem % 100
-    for (var i = 0; i < curr; ++i) {
-      num += "C"
-    }
-  }
-  if (rem >= 90) {
-    num += "XC"
-    rem -= 90
-  }
-  if (rem >= 50) {
-    num += "L"
-    rem -= 50
-  }
-  if (rem >= 40) {
-    num += "LX"
-    rem -= 40
-  }
-
-  if (rem > 9) {
-    curr = Math.floor(rem / 10)
-    rem = rem % 10
-    for (var i = 0; i < curr; ++i) {
-      num += "X"
-    }
-  }
-  if (rem === 9) {
-    num += "IX"
-    rem -= 9
-  }
-  if (rem >= 5) {
-    num += "V"
-    rem -= 5
-  }
-  if (rem === 4) {
-    num += "IV"
-    rem -= 4
-  }
-  curr = rem
-  for (var i = 0; i < curr; ++i) {
-    num += "I"
-  }
-  return num
+  return this.roman
 }
 
 function testRoman () {

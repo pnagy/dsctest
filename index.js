@@ -42,12 +42,31 @@ var checkRomanInput = function(number) {
 }
 
 
-function RomanNumber (number) {
+function getDigitValues(number, base) {
+  var romanDigits = [9, 5, 4]
+  var roman = ""
+  for (var i = 0; i < romanDigits.length; ++i) {
+    if (number >= (romanDigits[i] * base)) {
+      var value = getRomanValue(romanDigits[i] * base)
+      if (value) {
+        roman += value
+      } else {
+        roman += getRomanValue(base) + getRomanValue((romanDigits[i] + 1) * base)
+      }
+      number -= (romanDigits[i] * base)
+    }
+  }
+  for (var i = 0; i < Math.floor(number / base); ++i) {
+    roman += getRomanValue(base)
+  }
+  return roman
+}
 
+function RomanNumber (number) {
+  if (!(this instanceof RomanNumber)) return new RomanNumber(number);
   if (!number) throw new Error(ERRORS.INVALID_VALUE)
   this.arabic = checkArabicInput(number)
   this.roman = checkRomanInput(number)
-
 }
 
 RomanNumber.prototype.toInt = function() {
@@ -96,26 +115,6 @@ RomanNumber.prototype.toInt = function() {
   }
   this.arabic += subsum
   return this.arabic
-}
-
-function getDigitValues(number, base) {
-  var romanDigits = [9, 5, 4]
-  var roman = ""
-  for (var i = 0; i < romanDigits.length; ++i) {
-    if (number >= (romanDigits[i] * base)) {
-      var value = getRomanValue(romanDigits[i] * base)
-      if (value) {
-        roman += value
-      } else {
-        roman += getRomanValue(base) + getRomanValue((romanDigits[i] + 1) * base)
-      }
-      number -= (romanDigits[i] * base)
-    }
-  }
-  for (var i = 0; i < Math.floor(number / base); ++i) {
-    roman += getRomanValue(base)
-  }
-  return roman
 }
 
 RomanNumber.prototype.toString = function() {
@@ -277,8 +276,12 @@ function testRoman () {
   number = new RomanNumber(tested)
   console.log("%s tested: %s expected: %s", (number.toInt() === expected) ? "YES" : "NO", tested, expected)
 
-}
+  tested = "MCMLXXX"
+  expected = 1980
+  number = RomanNumber(tested)
+  console.log("%s tested: %s expected: %s", (number.toInt() === expected) ? "YES" : "NO", tested, expected)
 
+}
 testRoman()
 
 module.exports = RomanNumber;

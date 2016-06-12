@@ -4,11 +4,11 @@ var ERRORS = {
 }
 
 var ROMAN_DIGITS = ["I", "V", "X", "L", "C", "D", "M"]
+var ARABIC_DIGITS = [1, 5, 10, 50, 100, 500, 1000]
 
-var checkInput = function (number) {
 
-
-  throw new Error(ERRORS.INVALID_VALUE)
+var getValue = function (number) {
+  if (typeof number === "string") return ARABIC_DIGITS[ROMAN_DIGITS.indexOf(number)]
 }
 
 var checkArabicInput = function(number) {
@@ -40,16 +40,39 @@ function RomanNumber (number) {
 
   if (!number) throw new Error(ERRORS.INVALID_VALUE)
   this.arabic = checkArabicInput(number)
-  this.string = checkRomanInput(number)
+  this.roman = checkRomanInput(number)
 
 }
 
 RomanNumber.prototype.toInt = function() {
   if (this.arabic !== null) return this.arabic
-}
+  if (this.roman !== null) {
+    var sum = 0
+    var subsum = 0
+    var currIndex = ROMAN_DIGITS.indexOf(this.roman[j])
+    var prevIndex = ROMAN_DIGITS.indexOf(this.roman[j - 1])
+    var nextIndex = ROMAN_DIGITS.indexOf(this.roman[j + 1])
+    for (var j = 0; j < this.roman.length; ++j) {
+      var arabValue = getValue(this.roman[j])
+      if (subsum === 0) {
+        subsum = arabValue
+        continue
+      }
+      if (currIndex === prevIndex) {
+        subsum = subsum + arabValue
+      }
+      if (currIndex > prevIndex) {
+        sum += arabValue - subsum
+        subsum = 0
+      }
+      if (currIndex < prevIndex && nextIndex < currIndex) {
+        sum += arabValue + subsum
+        subsum = 0
+      }
+    }
+    return sum + subsum
+  }
 
-RomanNumber.prototype.toString = function() {
-  if (this.roman !== null) return this.roman
 }
 
 function testRoman () {

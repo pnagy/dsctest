@@ -49,10 +49,16 @@ RomanNumber.prototype.toInt = function() {
   if (this.roman !== null) {
     var sum = 0
     var subsum = 0
-    var currIndex = ROMAN_DIGITS.indexOf(this.roman[j])
-    var prevIndex = ROMAN_DIGITS.indexOf(this.roman[j - 1])
-    var nextIndex = ROMAN_DIGITS.indexOf(this.roman[j + 1])
+    var skipDigit = false
     for (var j = 0; j < this.roman.length; ++j) {
+      if (skipDigit) {
+        skipDigit = false
+        continue;
+      }
+      var currIndex = ROMAN_DIGITS.indexOf(this.roman[j])
+      var prevIndex = ROMAN_DIGITS.indexOf(this.roman[j - 1])
+      var nextIndex = ROMAN_DIGITS.indexOf(this.roman[j + 1])
+
       var arabValue = getValue(this.roman[j])
       if (subsum === 0) {
         subsum = arabValue
@@ -65,9 +71,15 @@ RomanNumber.prototype.toInt = function() {
         sum += arabValue - subsum
         subsum = 0
       }
-      if (currIndex < prevIndex && nextIndex < currIndex) {
-        sum += arabValue + subsum
-        subsum = 0
+      if (currIndex < prevIndex) {
+        if (currIndex < nextIndex) {
+          sum += subsum + getValue(this.roman[j+1]) - arabValue
+          subsum = 0
+          skipDigit = true
+        } else {
+          sum += arabValue + subsum
+          subsum = 0
+        }
       }
     }
     return sum + subsum
@@ -87,15 +99,15 @@ RomanNumber.prototype.toString = function() {
       num += "M"
     }
   }
-  if (rem > 900) {
+  if (rem >= 900) {
     num += "CM"
     rem -= 900
   }
-  if (rem > 500) {
+  if (rem >= 500) {
     num += "D"
     rem -= 500
   }
-  if (rem > 400) {
+  if (rem >= 400) {
     num += "CD"
     rem -= 400
   }

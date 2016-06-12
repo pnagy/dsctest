@@ -74,6 +74,76 @@ RomanNumber.prototype.toInt = function() {
   }
 
 }
+RomanNumber.prototype.toString = function() {
+  if (this.roman !== null) return this.roman
+  var num = ""
+  var rem = this.arabic
+  var curr
+
+  if (rem > 999) {
+    curr = Math.floor(rem / 1000)
+    rem = rem % 1000
+    for (var i = 0; i < curr; ++i) {
+      num += "M"
+    }
+  }
+  if (rem > 900) {
+    num += "CM"
+    rem -= 900
+  }
+  if (rem > 500) {
+    num += "D"
+    rem -= 500
+  }
+  if (rem > 400) {
+    num += "CD"
+    rem -= 400
+  }
+
+  if (rem > 99) {
+    curr = Math.floor(rem / 100)
+    rem = rem % 100
+    for (var i = 0; i < curr; ++i) {
+      num += "C"
+    }
+  }
+  if (rem >= 90) {
+    num += "XC"
+    rem -= 90
+  }
+  if (rem >= 50) {
+    num += "L"
+    rem -= 50
+  }
+  if (rem >= 40) {
+    num += "LX"
+    rem -= 40
+  }
+  if (rem > 9) {
+    curr = Math.floor(rem / 10)
+    rem = rem % 10
+    for (var i = 0; i < curr; ++i) {
+      num += "X"
+    }
+  }
+  if (rem === 9) {
+    num += "IX"
+    rem -= 9
+  }
+  if (rem >= 5) {
+    num += "V"
+    rem -= 5
+  }
+  if (rem === 4) {
+    num += "IV"
+    rem -= 4
+  }
+  curr = rem
+  for (var i = 0; i < curr; ++i) {
+    num += "I"
+  }
+  return num
+}
 
 function testRoman () {
 
